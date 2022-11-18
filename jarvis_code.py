@@ -4,7 +4,7 @@ import datetime
 from time import sleep
 import os
 import webbrowser , wikipedia
-
+import smtplib
 
 engine = pyttsx3.init('sapi5')
 voices = engine.getProperty('voices')
@@ -16,11 +16,11 @@ def speak_msg(st):
     engine.say(st)
     engine.runAndWait()
     
-def tell_msg():
+def tell_msg(st):
     '''This function is used to convert voice message into text format'''
     r = sr.Recognizer()
     with sr.Microphone() as source:
-        speak_msg("Speak your msg")
+        speak_msg("Speak "+st)
         msg = r.listen(source)
         msg_text = r.recognize_google(msg)
         
@@ -46,7 +46,34 @@ def wish_me():
     else:
         speak_msg("Good Evening Sir, how may i help you")
 
-
+def send_mail():
+    '''This function is used to send text message from one person to other just by voice'''
+    
+    # starting the server
+    server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
+    s_email_text = tell_msg("Sender's Email")
+    s_email_text = s_email_text.lower()
+    s_email = s_email_text.replace(" ","")+"@gmail.com"
+    print("Sender's Email : "+s_email)
+    
+    password = "bunwaxscixztoarw"
+    #server.login(username,password)
+    server.login(s_email,password)
+    
+    r_email_text = tell_msg("Receiver's Email")
+    r_email_text = r_email_text.lower()
+    r_email = r_email_text.replace(" ","")+"@gmail.com"
+    print("Receiver's Email : "+r_email)
+    
+    msg = tell_msg("your msg")
+    print("your msg is : ",msg)
+    
+    #sendmail(from,to,message)
+    server.sendmail(s_email,r_email,msg)
+    
+    speak_msg("Mail sent")
+    server.quit()
+    
 def task(query):
     
     if "wikipedia" in query:
@@ -68,6 +95,9 @@ def task(query):
     elif "time"in query:
         str_time = datetime.datetime.now().strftime("%H:%M:%S")
         speak_msg(str_time)
+        
+    elif "send mail" in query:
+        send_mail()
 
     elif "quit" in query:
         speak_msg("Jarvis is pleased to help you sir")
