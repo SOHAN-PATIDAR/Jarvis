@@ -1,11 +1,11 @@
 # Jarvis : Virtual Voice Assistant
 
 # libraries to install:-
-pip install pyttsx3
-pip install speech_recognition
-pip install webbrowser 
-pip install wikipedia
-pip install smtplib
+    pip install pyttsx3
+    pip install speech_recognition
+    pip install webbrowser 
+    pip install wikipedia
+    pip install smtplib
 
 
 # Steps to follow for sending a mail
