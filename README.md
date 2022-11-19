@@ -6,6 +6,7 @@
     pip install webbrowser 
     pip install wikipedia
     pip install smtplib
+    pip install imaplib
 
 
 # Steps to follow for sending a mail

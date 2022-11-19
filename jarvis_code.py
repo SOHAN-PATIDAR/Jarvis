@@ -4,7 +4,7 @@ import datetime
 from time import sleep
 import os
 import webbrowser , wikipedia
-import smtplib
+import smtplib, imaplib, email
 
 engine = pyttsx3.init('sapi5')
 voices = engine.getProperty('voices')
@@ -56,10 +56,17 @@ def send_mail():
     s_email = s_email_text.replace(" ","")+"@gmail.com"
     print("Sender's Email : "+s_email)
     
-    password = "bunwaxscixztoarw"
-    #server.login(username,password)
-    server.login(s_email,password)
+    # password = "bunwaxscixztoarw" this will be the format for app password
+    password = "enter your app password"
     
+    '''server.login(username,password)'''
+    
+    try:
+        server.login(s_email,password)
+    except Exception as e:
+        speak_msg("User not found")
+        send_mail()
+        
     r_email_text = tell_msg("Receiver's Email")
     r_email_text = r_email_text.lower()
     r_email = r_email_text.replace(" ","")+"@gmail.com"
@@ -74,8 +81,41 @@ def send_mail():
     speak_msg("Mail sent")
     server.quit()
     
-def task(query):
     
+def read_mail():
+    '''This function is used to hear the last mail received in your inbox '''
+    host = "imap.gmail.com"
+    
+    r_email_text = tell_msg("Receiver's Email")
+    r_email_text = r_email_text.lower()
+    r_email = r_email_text.replace(" ","")+"@gmail.com"
+    print("Receiver's Email : "+r_email)
+    
+    password = "enter your app password"
+    mail = imaplib.IMAP4_SSL(host)
+    mail.login(r_email,password)
+    mail.select("INBOX")
+    
+    
+    _, search_data = mail.search(None, 'all')
+    inbox_item_list = search_data[0].split()
+    latest = inbox_item_list[-1] 
+    _, data = mail.fetch(latest, '(RFC822)')   
+    _, b = data[0]
+   
+    email_message = email.message_from_bytes(b)
+ 
+    for part in email_message.walk():
+        if part.get_content_type() == "text/plain":
+            body = part.get_payload(decode=True)
+            text_message = body.decode() 
+
+    speak_msg("Subject of message is {}. And it is sent by {}. The message is : {}".format(
+        email_message['subject'], email_message['from'], text_message))
+    
+       
+def task(query):
+    '''will recognize the task given by user and perform it accordingly'''
     if "wikipedia" in query:
         speak_msg("Searching Wikipedia....")
         query.replace("wikipedia", "")
@@ -98,6 +138,9 @@ def task(query):
         
     elif "send mail" in query:
         send_mail()
+        
+    elif "read mail" in query:
+        read_mail()
 
     elif "quit" in query:
         speak_msg("Jarvis is pleased to help you sir")
@@ -105,6 +148,7 @@ def task(query):
 
 
 def input_query():
+    '''used to recognize the task you want to perform'''
     r = sr.Recognizer()
     with sr.Microphone() as source:
         print("Jarvis is listening sir,")
